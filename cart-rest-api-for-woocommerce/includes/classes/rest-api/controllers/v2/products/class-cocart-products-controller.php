@@ -228,7 +228,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 		 * @param WC_Product       $product  The product object.
 		 * @param WP_REST_Request  $request  The request object.
 		 */
-		return apply_filters( "cocart_prepare_{$this->post_type}_object_v2", $response, $product, $request );
+		return apply_filters( "cocart_prepare_{$this->post_type}_object_v2", $response, $product, $request ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	} // END prepare_object_for_response()
 
 	/**
@@ -260,7 +260,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 			}
 
 			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
-			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $variation_id, $variation ) && ! $variation->variation_is_visible() ) {
+			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $variation_id, $variation ) && ! $variation->variation_is_visible() ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 				continue;
 			}
 
@@ -454,7 +454,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 	 *
 	 * @param WC_Product $product The product object.
 	 *
-	 * @return array $data Product data.
+	 * @return array $data The product details.
 	 */
 	protected function get_product_data( $product ) {
 		$type         = $product->get_type();
@@ -587,7 +587,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 	 *
 	 * @param WC_Variation_Product $product The product object.
 	 *
-	 * @return array $data Product data.
+	 * @return array $data Variation product details.
 	 */
 	protected function get_variation_product_data( $product ) {
 		$data = self::get_product_data( $product );
@@ -764,7 +764,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 	 * @param WC_Product $product The product object.
 	 * @param string     $type    Type of products to return.
 	 *
-	 * @return array $connected_products Product data.
+	 * @return array $connected_products The product object.
 	 */
 	public function get_connected_products( $product, $type ) {
 		switch ( $type ) {
@@ -977,8 +977,8 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 	 *
 	 * @see CoCart_REST_Products_V2_Controller::get_price_range()
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @param string      $tax_display_mode If returned prices are incl or excl of tax.
+	 * @param WC_Product $product          The product object.
+	 * @param string     $tax_display_mode If returned prices are incl or excl of tax.
 	 *
 	 * @return array
 	 */

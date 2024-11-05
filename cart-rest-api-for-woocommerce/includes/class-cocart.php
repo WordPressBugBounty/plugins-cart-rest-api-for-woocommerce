@@ -28,7 +28,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $version = '4.3.6';
+	public static $version = '4.3.7';
 
 	/**
 	 * CoCart Database Schema version.
@@ -164,10 +164,12 @@ final class CoCart {
 		self::define( 'COCART_STORE_URL', 'https://cocartapi.com/' );
 		self::define( 'COCART_PLUGIN_URL', 'https://wordpress.org/plugins/cart-rest-api-for-woocommerce/' );
 		self::define( 'COCART_SUPPORT_URL', 'https://wordpress.org/support/plugin/cart-rest-api-for-woocommerce' );
-		self::define( 'COCART_REVIEW_URL', 'https://wordpress.org/support/plugin/cart-rest-api-for-woocommerce/reviews/' );
+		self::define( 'COCART_REVIEW_URL', 'https://testimonial.to/cocart' );
+		self::define( 'COCART_SUGGEST_FEATURE', 'https://cocartapi.com/suggest-a-feature/' );
 		self::define( 'COCART_COMMUNITY_URL', 'https://cocartapi.com/community/' );
 		self::define( 'COCART_DOCUMENTATION_URL', 'https://docs.cocart.xyz' );
-		self::define( 'COCART_TRANSLATION_URL', 'https://translate.cocart.xyz/projects/cart-rest-api-for-woocommerce/' );
+		self::define( 'COCART_TRANSLATION_URL', 'https://translate.cocartapi.com/projects/cart-rest-api-for-woocommerce/' );
+		self::define( 'COCART_REPO_URL', 'https://github.com/co-cart/co-cart' );
 		self::define( 'COCART_NEXT_VERSION', '5.0.0' );
 	} // END setup_constants()
 
@@ -499,7 +501,7 @@ final class CoCart {
 		 *
 		 * @since 2.1.0 Introduced.
 		 *
-		 * @param string $is_rest_api_request REST API uri requested.
+		 * @param bool $is_rest_api_request True if CoCart REST API is requested.
 		 */
 		return apply_filters( 'cocart_is_rest_api_request', $is_rest_api_request );
 	} // END is_rest_api_request()
@@ -570,7 +572,7 @@ final class CoCart {
 	 * @static
 	 *
 	 * @since   1.0.0 Introduced.
-	 * @version 2.6.0
+	 * @version 4.3.7
 	 */
 	public static function load_plugin_textdomain() {
 		if ( function_exists( 'determine_locale' ) ) {
@@ -582,7 +584,7 @@ final class CoCart {
 		$locale = apply_filters( 'plugin_locale', $locale, COCART_SLUG );
 
 		unload_textdomain( COCART_SLUG );
-		load_textdomain( COCART_SLUG, WP_LANG_DIR . '/cart-rest-api-for-woocommerce/cart-rest-api-for-woocommerce-' . $locale . '.mo' );
+		load_textdomain( COCART_SLUG, WP_LANG_DIR . '/' . COCART_SLUG . '/' . COCART_SLUG . '-' . $locale . '.mo' );
 		load_plugin_textdomain( COCART_SLUG, false, plugin_basename( dirname( COCART_FILE ) ) . '/languages' );
 	} // END load_plugin_textdomain()
 } // END class

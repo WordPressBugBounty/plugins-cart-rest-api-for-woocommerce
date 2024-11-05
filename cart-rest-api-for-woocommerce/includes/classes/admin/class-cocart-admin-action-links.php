@@ -38,7 +38,7 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 			$this->campaign_args['utm_content'] = 'action-links';
 
 			add_filter( 'plugin_action_links_' . plugin_basename( COCART_FILE ), array( $this, 'plugin_action_links' ) );
-			add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 3 );
+			add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 		} // END __construct()
 
 		/**
@@ -90,7 +90,7 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 						/* translators: %s: CoCart */
 						esc_attr__( 'Upgrade %s', 'cart-rest-api-for-woocommerce' ),
 						'CoCart'
-					) . '" target="_blank" style="color: #6032b0; font-weight: 600;">%2$s</a>',
+					) . '" target="_blank" rel="noopener noreferrer" style="color: #6032b0; font-weight: 600;">%2$s</a>',
 					esc_url( $store_url ),
 					sprintf(
 						/* translators: %s: CoCart */
@@ -108,12 +108,15 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 		/**
 		 * Plugin row meta links
 		 *
-		 * @access  public
-		 * @since   2.0.0
+		 * @access public
+		 *
+		 * @since   2.0.0 Introduced.
 		 * @version 3.10.0
-		 * @param   array  $metadata An array of the plugin's metadata.
-		 * @param   string $file     Path to the plugin file.
-		 * @return  array  $metadata
+		 *
+		 * @param array  $metadata An array of the plugin's metadata.
+		 * @param string $file     Path to the plugin file.
+		 *
+		 * @return array $metadata An array of the plugin's metadata.
 		 */
 		public function plugin_row_meta( $metadata, $file ) {
 			if ( version_compare( get_option( 'cocart_version' ), COCART_VERSION, '<' ) ) {
@@ -132,7 +135,7 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 						esc_attr__( 'Join %1$s Community on %2$s', 'cart-rest-api-for-woocommerce' ),
 						'CoCart',
 						'Discord'
-					) . '" target="_blank">' . esc_attr__( 'Join Community', 'cart-rest-api-for-woocommerce' ) . '</a>',
+					) . '" target="_blank" rel="noopener noreferrer">' . esc_attr__( 'Join Community', 'cart-rest-api-for-woocommerce' ) . '</a>',
 					'docs'      => '<a href="' . CoCart_Helpers::build_shortlink( add_query_arg( $this->campaign_args, esc_url( COCART_DOCUMENTATION_URL ) ) ) . '" title="' . sprintf(
 						/* translators: %s: CoCart */
 						esc_attr__( 'View %s Documentation', 'cart-rest-api-for-woocommerce' ),
@@ -141,7 +144,7 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 						/* translators: %s: CoCart */
 						esc_attr__( 'View %s Documentation', 'cart-rest-api-for-woocommerce' ),
 						'CoCart'
-					) . '" target="_blank">' . esc_attr__( 'Documentation', 'cart-rest-api-for-woocommerce' ) . '</a>',
+					) . '" target="_blank" rel="noopener noreferrer">' . esc_attr__( 'Documentation', 'cart-rest-api-for-woocommerce' ) . '</a>',
 					'translate' => '<a href="' . CoCart_Helpers::build_shortlink( add_query_arg( $this->campaign_args, esc_url( COCART_TRANSLATION_URL ) ) ) . '" title="' . sprintf(
 						/* translators: %s: CoCart */
 						esc_attr__( 'Translate %s', 'cart-rest-api-for-woocommerce' ),
@@ -150,16 +153,16 @@ if ( ! class_exists( 'CoCart_Admin_Action_Links' ) ) {
 						/* translators: %s: CoCart */
 						esc_attr__( 'Translate %s', 'cart-rest-api-for-woocommerce' ),
 						'CoCart'
-					) . '" target="_blank">' . esc_attr__( 'Translate', 'cart-rest-api-for-woocommerce' ) . '</a>',
+					) . '" target="_blank" rel="noopener noreferrer">' . esc_attr__( 'Translate', 'cart-rest-api-for-woocommerce' ) . '</a>',
 					'review'    => '<a href="' . esc_url( COCART_REVIEW_URL ) . '" title="' . sprintf(
 						/* translators: %s: CoCart */
-						esc_attr__( 'Review %s on WordPress.org', 'cart-rest-api-for-woocommerce' ),
+						esc_attr__( 'Submit a review for %s', 'cart-rest-api-for-woocommerce' ),
 						'CoCart'
 					) . '" aria-label="' . sprintf(
 						/* translators: %s: CoCart */
-						esc_attr__( 'Review %s on WordPress.org', 'cart-rest-api-for-woocommerce' ),
+						esc_attr__( 'Submit a review for %s', 'cart-rest-api-for-woocommerce' ),
 						'CoCart'
-					) . '" target="_blank">' . esc_attr__( 'Leave a Review', 'cart-rest-api-for-woocommerce' ) . '</a>',
+					) . '" target="_blank" rel="noopener noreferrer">' . esc_attr__( 'Leave a Review', 'cart-rest-api-for-woocommerce' ) . '</a>',
 				);
 
 				$metadata = array_merge( $metadata, $row_meta );

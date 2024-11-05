@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   2.6.0 Introduced.
- * @version 4.0.0
+ * @version 4.3.7
  */
 
 // Exit if accessed directly.
@@ -106,6 +106,9 @@ if ( ! class_exists( 'CoCart_Authentication' ) ) {
 				add_filter( 'determine_current_user', array( $this, 'authenticate' ), 16 );
 				add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
 
+				// Triggers saved cart after login and updates user activity.
+				add_filter( 'rest_authentication_errors', array( $this, 'cocart_user_logged_in' ), 10 );
+
 				// Check authentication errors.
 				add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 
@@ -127,15 +130,14 @@ if ( ! class_exists( 'CoCart_Authentication' ) ) {
 		 *
 		 * @since 2.9.1 Introduced.
 		 *
-		 * @deprecated 4.2.0 No replacement. Not needed anymore.
+		 * @since 4.2.0 Deprecated, thinking it was not needed anymore due to changes to support WooCommerce better for performance.
+		 * @since 4.3.7 Reinstated again.
 		 *
 		 * @param WP_Error|null|bool $error Error from another authentication handler, null if we should handle it, or another value if not.
 		 *
 		 * @return WP_Error|null|bool
 		 */
 		public function cocart_user_logged_in( $error ) {
-			cocart_deprecated_function( 'CoCart_Authentication::cocart_user_logged_in', '4.2.0', null );
-
 			// Pass through errors from other authentication error checks used before this one.
 			if ( ! empty( $error ) ) {
 				return $error;
@@ -150,6 +152,25 @@ if ( ! class_exists( 'CoCart_Authentication' ) ) {
 
 			return $error;
 		} // END cocart_user_logged_in()
+
+		/**
+		 * Returns true if we are making a REST API request for CoCart.
+		 *
+		 * @access public
+		 *
+		 * @static
+		 *
+		 * @since 2.1.0 Introduced.
+		 *
+		 * @deprecated 4.2.0 Moved function to main plugin class.
+		 *
+		 * @return bool
+		 */
+		public static function is_rest_api_request() {
+			cocart_deprecated_function( 'CoCart_Authentication::is_rest_api_request', '4.2.0', 'CoCart::is_rest_api_request' );
+
+			return CoCart::is_rest_api_request();
+		} // END is_rest_api_request()
 
 		/**
 		 * Get the authorization header.
@@ -193,7 +214,7 @@ if ( ! class_exists( 'CoCart_Authentication' ) ) {
 			 *
 			 * @since 4.1.0 Introduced.
 			 *
-			 * @param string Authorization header.
+			 * @param string $auth_header Authorization header.
 			 */
 			return apply_filters( 'cocart_auth_header', $auth_header );
 		} // END get_auth_header()
@@ -226,9 +247,9 @@ if ( ! class_exists( 'CoCart_Authentication' ) ) {
 			 * @since 2.6.0 Introduced.
 			 * @since 3.8.1 Passed the authentication class as parameter.
 			 *
-			 * @param int    $user_id The user ID returned if authentication was successful.
-			 * @param bool            Determines if the site is secure.
-			 * @param object $this    The Authentication class.
+			 * @param int    $user_id              The user ID returned if authentication was successful.
+			 * @param bool   $is_secure            Determines if the site is secure.
+			 * @param object $authentication_class The Authentication class.
 			 */
 			$user_id = apply_filters( 'cocart_authenticate', $user_id, is_ssl(), $this );
 

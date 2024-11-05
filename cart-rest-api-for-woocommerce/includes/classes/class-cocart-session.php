@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   2.1.0 Introduced.
- * @version 4.2.0
+ * @version 4.3.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -361,6 +361,11 @@ class CoCart_Load_Cart {
 			return false;
 		}
 
+		// Make sure we are not accessing this feature via REST API to prevent conflicting loops.
+		if ( CoCart::is_rest_api_request() ) {
+			return false;
+		}
+
 		$action = self::get_action_query();
 
 		// If we did not request to load a cart then just return.
@@ -386,7 +391,7 @@ class CoCart_Load_Cart {
 		 *
 		 * @since 2.8.2 Introduced.
 		 *
-		 * @param string
+		 * @param string $action_query Default is 'cocart-load-cart'
 		 */
 		$load_cart = apply_filters( 'cocart_load_cart_query_name', 'cocart-load-cart' );
 

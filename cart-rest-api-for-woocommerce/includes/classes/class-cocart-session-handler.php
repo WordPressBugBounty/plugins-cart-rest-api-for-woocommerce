@@ -646,7 +646,7 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	public function update_session_timestamp( $customer_id, $timestamp ) {
 		global $wpdb;
 
-		$wpdb->update(
+		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$this->_table,
 			array(
 				'cart_expiry' => $timestamp,
@@ -798,8 +798,6 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	 *
 	 * @param string $cart_key The cart key.
 	 * @param mixed  $default  Default cart value.
-	 *
-	 * @return string|array
 	 */
 	public function get_cart( $cart_key, $default = false ) {
 		cocart_deprecated_function( 'CoCart_Session_Handler::get_cart', '4.2.0', 'WC()->session->get_session()' );

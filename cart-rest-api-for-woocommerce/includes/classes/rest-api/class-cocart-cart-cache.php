@@ -69,7 +69,7 @@ class CoCart_Cart_Cache {
 		 *
 		 * @since 4.1.0 Introduced.
 		 *
-		 * @param array           $cart_item Cart item.
+		 * @param array           $cart_item The cart item data.
 		 * @param WP_REST_Request $request   The request object.
 		 */
 		if ( ! $this->does_product_allow_price_change( $cart_item, $request ) ) {
@@ -136,12 +136,16 @@ class CoCart_Cart_Cache {
 
 		// If cart contents is cached, proceed.
 		if ( ! empty( $cart_contents_cached ) && is_array( $cart_contents_cached ) ) {
+
+			$tax_display_mode = CoCart_Utilities_Cart_Helpers::get_tax_display_mode();
+			$price_function   = CoCart_Utilities_Product_Helpers::get_price_from_tax_display_mode( $tax_display_mode );
+
 			foreach ( $cart->get_cart() as $key => $value ) {
 				$product = $value['data']; // Get original product data.
 
 				// If this item is cached then look up price difference before setting the new price.
 				if ( isset( $cart_contents_cached[ $key ] ) ) {
-					if ( isset( $cart_contents_cached[ $key ]['price'] ) && $product->get_price() !== $cart_contents_cached[ $key ]['price'] ) {
+					if ( isset( $cart_contents_cached[ $key ]['price'] ) && $price_function( $product ) !== $cart_contents_cached[ $key ]['price'] ) {
 						$value['data']->set_price( $cart_contents_cached[ $key ]['price'] );
 					}
 				}
@@ -158,8 +162,8 @@ class CoCart_Cart_Cache {
 	 * @since 4.1.0 Introduced.
 	 *
 	 * @param string|int $price     Product price.
-	 * @param array      $cart_item Cart item data.
-	 * @param string     $item_key  Item key.
+	 * @param array      $cart_item The cart item data.
+	 * @param string     $item_key  The item key currently looped.
 	 *
 	 * @return string|int $price Product price
 	 */
@@ -265,7 +269,7 @@ class CoCart_Cart_Cache {
 	 *
 	 * @since 4.1.0 Introduced.
 	 *
-	 * @param array           $cart_item Cart item.
+	 * @param array           $cart_item The cart item data.
 	 * @param WP_REST_Request $request   The request object.
 	 *
 	 * @return bool True if the cart item can be allowed to override the price.
@@ -276,9 +280,9 @@ class CoCart_Cart_Cache {
 		 *
 		 * @since 4.1.0 Introduced.
 		 *
-		 * @param bool
-		 * @param array           $cart_item Cart item.
-		 * @param WP_REST_Request $request   The request object.
+		 * @param bool            $allow_change Allow price change.
+		 * @param array           $cart_item    Cart item.
+		 * @param WP_REST_Request $request      The request object.
 		 */
 		return apply_filters( 'cocart_does_product_allow_price_change', true, $cart_item, $request );
 	} // END does_product_allow_price_change()

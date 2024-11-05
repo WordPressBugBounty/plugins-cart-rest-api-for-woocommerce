@@ -138,13 +138,15 @@ class CoCart_REST_Add_Item_V2_Controller extends CoCart_Add_Item_Controller {
 				 * Allows you to specify the handlers validation method for
 				 * adding item to the cart.
 				 *
+				 * Example use for filter: 'cocart_add_to_cart_handler_subscription'.
+				 *
 				 * @since 2.1.0 Introduced.
 				 *
 				 * @param string          $adding_to_cart_handler The product type to identify handler.
 				 * @param WC_Product      $adding_to_cart         The product object.
 				 * @param WP_REST_Request $request                The request object.
 				 */
-				$item_added_to_cart = apply_filters( 'cocart_add_to_cart_handler_' . $add_to_cart_handler, $adding_to_cart, $request ); // Custom handler.
+				$item_added_to_cart = apply_filters( "cocart_add_to_cart_handler_{$add_to_cart_handler}", $adding_to_cart, $request ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			} else {
 				$item_added_to_cart = $this->add_to_cart_handler_simple( $product_id, $quantity, $item_data, $request );
 			}
@@ -345,6 +347,15 @@ class CoCart_REST_Add_Item_V2_Controller extends CoCart_Add_Item_Controller {
 			// If item_key is set, then the item is already in the cart so just update the quantity.
 			if ( ! empty( $item_key ) ) {
 				$cart_contents = $controller->get_cart( array( 'raw' => true ) );
+
+				/**
+				 * If the item key was not found in cart then we need to reset it as the item may have been
+				 * manipulated by adding cart item data via code or a plugin. This helps prevent undefined errors.
+				 */
+				if ( ! in_array( $item_key, $cart_contents ) ) {
+					$product_to_add['item_key'] = ''; // Clear previous item key.
+					return $this->add_item_to_cart( $product_to_add );
+				}
 
 				$new_quantity = $quantity + $cart_contents[ $item_key ]['quantity'];
 
