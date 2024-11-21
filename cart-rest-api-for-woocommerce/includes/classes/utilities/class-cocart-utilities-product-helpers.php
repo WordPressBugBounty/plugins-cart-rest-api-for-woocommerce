@@ -305,6 +305,12 @@ class CoCart_Utilities_Product_Helpers {
 		foreach ( $meta_data as $meta ) {
 			$ignore_meta = false;
 
+			// Should the meta key start with an underscore prefix, ignore it as it is suppose to be hidden from public.
+			if ( str_starts_with( $meta->key, '_' ) ) {
+				$ignore_meta = true;
+				break;
+			}
+
 			foreach ( $ignore_private_meta_keys as $ignore ) {
 				if ( str_starts_with( $meta->key, $ignore ) ) {
 					$ignore_meta = true;
@@ -328,4 +334,40 @@ class CoCart_Utilities_Product_Helpers {
 		 */
 		return array_values( apply_filters( 'cocart_products_get_safe_meta_data', $safe_meta, $product ) );
 	} // END get_meta_data()
+
+	/**
+	 * Verifies the product ID passed and returns as an integer value.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 4.3.13 Introduced.
+	 *
+	 * @param string $id A product ID or SKU.
+	 *
+	 * @return int $product_id Product ID.
+	 */
+	public static function get_product_id( string $id ) {
+		$product_id = $id;
+
+		// Return nothing if no product ID was provided.
+		if ( empty( $product_id ) ) {
+			return;
+		}
+
+		// If the product ID was used by a SKU ID, then look up the product ID and return it.
+		if ( ! is_numeric( $product_id ) ) {
+			$product_id_by_sku = wc_get_product_id_by_sku( $product_id );
+
+			if ( ! empty( $product_id_by_sku ) && $product_id_by_sku > 0 ) {
+				$product_id = $product_id_by_sku;
+			}
+		}
+
+		// Force product ID to be integer.
+		$product_id = (int) $product_id;
+
+		return $product_id;
+	} // END get_product_id()
 } // END class
