@@ -7,7 +7,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   1.0.0 Introduced.
- * @version 4.3.11
+ * @version 4.3.15
  */
 
 use WC_Customer as Customer;
@@ -191,6 +191,12 @@ class CoCart_REST_API {
 			add_action( 'woocommerce_cart_loaded_from_session', array( $session, 'set_session' ) );
 			add_action( 'woocommerce_removed_coupon', array( $session, 'set_session' ) );
 
+			// Persistent cart stored to usermeta.
+			add_action( 'woocommerce_add_to_cart', array( $session, 'persistent_cart_update' ) );
+			add_action( 'woocommerce_cart_item_removed', array( $session, 'persistent_cart_update' ) );
+			add_action( 'woocommerce_cart_item_restored', array( $session, 'persistent_cart_update' ) );
+			add_action( 'woocommerce_cart_item_set_quantity', array( $session, 'persistent_cart_update' ) );
+
 			return false;
 		}, 100, 2 );
 	} // END initialize_cart_session()
@@ -224,8 +230,8 @@ class CoCart_REST_API {
 			$this->initialize_customer();
 
 			// Initialize cart.
-			$this->initialize_cart_session();
 			$this->initialize_cart();
+			$this->initialize_cart_session();
 		}
 	} // END maybe_load_cart()
 
