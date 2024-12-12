@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, cart
 Requires at least: 5.6
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 4.3.15
+Stable tag: 4.3.16
 WC requires at least: 7.0
 WC tested up to: 9.4
 License: GPLv3
@@ -305,6 +305,12 @@ You can help [translate "CoCart" into your language](https://translate.wordpress
 We’d love to hear what you have to say. [Share your experience](https://testimonial.to/cocart) and help others discover CoCart. It helps to keep the plugin going strong, and is greatly appreciated.
 
 == Changelog ==
+
+= v4.3.16 - 12th December, 2024 =
+
+### Bug Fix
+
+* REST API: Authentication failed to validate incorrect login now fixed.
 
 = v4.3.15 - 29th November, 2024 =
 
@@ -710,6 +716,10 @@ Hope you enjoy this release.
 [View the full changelog here](https://github.com/co-cart/co-cart/blob/trunk/CHANGELOG.md).
 
 == Upgrade Notice ==
+
+= 4.3.16 =
+
+REST API: Authentication failed to validate incorrect login now fixed.
 
 = 4.3.15 =
 
