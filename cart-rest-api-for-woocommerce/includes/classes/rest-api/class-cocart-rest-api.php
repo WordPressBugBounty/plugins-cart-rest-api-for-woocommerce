@@ -7,7 +7,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   1.0.0 Introduced.
- * @version 4.3.21
+ * @version 4.3.27
  */
 
 use WC_Customer as Customer;
@@ -230,8 +230,8 @@ class CoCart_REST_API {
 			$this->initialize_customer();
 
 			// Initialize cart.
-			$this->initialize_cart();
 			$this->initialize_cart_session();
+			$this->initialize_cart();
 		}
 	} // END maybe_load_cart()
 
