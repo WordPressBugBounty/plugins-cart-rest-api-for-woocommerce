@@ -6,8 +6,9 @@
  *
  * @author  Sébastien Dumont
  * @package CoCart\RESTAPI\Products\v1
- * @since   3.1.0
- * @version 3.7.11
+ * @since   3.1.0 Introduced.
+ * @version 4.5.0
+ * @license GPL-3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Product controller class.
  *
- * @package CoCart Products/API
  * @extends WP_REST_Controller
  */
 class CoCart_Products_Controller extends WP_REST_Controller {
@@ -530,8 +530,9 @@ class CoCart_Products_Controller extends WP_REST_Controller {
 
 		// Map between taxonomy name and arg key.
 		$default_taxonomies = array(
-			'product_cat' => 'category',
-			'product_tag' => 'tag',
+			'product_cat'   => 'category',
+			'product_tag'   => 'tag',
+			'product_brand' => 'brand',
 		);
 
 		$taxonomies = array_merge( $all_product_taxonomies, $default_taxonomies );
@@ -539,10 +540,11 @@ class CoCart_Products_Controller extends WP_REST_Controller {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
+				$type        = is_numeric( $request[ $key ][0] ) ? 'term_id' : 'slug';
 				$operator    = $request[ $key . '_operator' ] && isset( $operator_mapping[ $request[ $key . '_operator' ] ] ) ? $operator_mapping[ $request[ $key . '_operator' ] ] : 'IN';
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
-					'field'    => is_numeric( $request[ $key ] ) ? 'term_id' : 'slug',
+					'field'    => $type,
 					'terms'    => $request[ $key ],
 					'operator' => $operator,
 				);
@@ -2376,6 +2378,20 @@ class CoCart_Products_Controller extends WP_REST_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['brand']              = array(
+			'description'       => __( 'Limit result set to products assigned a set of brand IDs or slugs, separated by commas.', 'cart-rest-api-for-woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['brand_operator']     = array(
+			'description'       => __( 'Operator to compare product brand terms.', 'cart-rest-api-for-woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array( 'in', 'not_in', 'and' ),
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['stock_status']       = array(
 			'description'       => __( 'Limit result set to products with specified stock status.', 'cart-rest-api-for-woocommerce' ),
 			'type'              => 'string',
@@ -2509,6 +2525,8 @@ class CoCart_Products_Controller extends WP_REST_Controller {
 				'price_desc',
 				'sales',
 				'rating',
+				'relevance',
+				'rand',
 			),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
