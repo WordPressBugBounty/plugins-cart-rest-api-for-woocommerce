@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the CoCart package.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoCart API - Decoupling Made Easy for WooCommerce 4.5.0\n"
+"Project-Id-Version: CoCart API - Headless WooCommerce Made Easy 4.6.0\n"
 "Report-Msgid-Bugs-To: https://github.com/co-cart/co-cart/issues\n"
-"POT-Creation-Date: 2025-05-31 14:56:40+00:00\n"
+"POT-Creation-Date: 2025-06-25 05:02:22+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -59,61 +59,56 @@ msgid "Setup Wizard"
 msgstr ""
 
 #: includes/classes/admin/class-cocart-admin-action-links.php:76
-#: includes/classes/admin/class-cocart-admin-action-links.php:80
 #. translators: %s: CoCart
 msgid "Support for %s"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:82
-#: includes/classes/admin/pages/class-cocart-admin-pages-support.php:76
-#: includes/classes/admin/pages/class-cocart-admin-pages-support.php:77
+#: includes/classes/admin/class-cocart-admin-action-links.php:78
+#: includes/classes/admin/pages/class-cocart-admin-pages-support.php:72
+#: includes/classes/admin/pages/class-cocart-admin-pages-support.php:73
 msgid "Support"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:91
-#: includes/classes/admin/class-cocart-admin-action-links.php:97
+#: includes/classes/admin/class-cocart-admin-action-links.php:89
 #. translators: %s: CoCart
 msgid "Upgrade %s"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:130
-#: includes/classes/admin/class-cocart-admin-action-links.php:135
+#: includes/classes/admin/class-cocart-admin-action-links.php:122
 #. translators: %1$s: CoCart, %2$s :Discord
 msgid "Join %1$s Community on %2$s"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:138
-#: includes/classes/admin/views/html-next-steps.php:109
+#: includes/classes/admin/class-cocart-admin-action-links.php:125
+#: includes/classes/admin/views/html-next-steps.php:134
 msgid "Join Community"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:141
-#: includes/classes/admin/class-cocart-admin-action-links.php:145
+#: includes/classes/admin/class-cocart-admin-action-links.php:128
 #. translators: %s: CoCart
 msgid "View %s Documentation"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:147
+#: includes/classes/admin/class-cocart-admin-action-links.php:130
 msgid "Documentation"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:150
-#: includes/classes/admin/class-cocart-admin-action-links.php:154
+#: includes/classes/admin/class-cocart-admin-action-links.php:133
 #. translators: %s: CoCart
 msgid "Translate %s"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:156
+#: includes/classes/admin/class-cocart-admin-action-links.php:135
+#: includes/classes/admin/views/html-next-steps.php:106
 msgid "Translate"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:159
-#: includes/classes/admin/class-cocart-admin-action-links.php:163
+#: includes/classes/admin/class-cocart-admin-action-links.php:138
 #. translators: %s: CoCart
 msgid "Submit a review for %s"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-action-links.php:165
+#: includes/classes/admin/class-cocart-admin-action-links.php:140
 msgid "Leave a Review"
 msgstr ""
 
@@ -187,6 +182,8 @@ msgid ""
 msgstr ""
 
 #: includes/classes/admin/class-cocart-admin-help-tab.php:79
+#: includes/classes/admin/views/html-next-steps.php:112
+#: includes/classes/admin/views/html-next-steps.php:118
 msgid "Help translate"
 msgstr ""
 
@@ -275,10 +272,6 @@ msgstr ""
 msgid "Will your headless setup use multiple domains?"
 msgstr ""
 
-#: includes/classes/admin/class-cocart-admin-setup-wizard.php:316
-msgid "Multiple Domains"
-msgstr ""
-
 #: includes/classes/admin/class-cocart-admin-setup-wizard.php:317
 #: includes/classes/admin/class-cocart-admin-setup-wizard.php:325
 msgid "No"
@@ -302,10 +295,6 @@ msgstr ""
 
 #: includes/classes/admin/class-cocart-admin-setup-wizard.php:323
 msgid "Do you require support for JWT Authentication?"
-msgstr ""
-
-#: includes/classes/admin/class-cocart-admin-setup-wizard.php:324
-msgid "JWT Authentication"
 msgstr ""
 
 #: includes/classes/admin/class-cocart-admin-setup-wizard.php:330
@@ -459,71 +448,100 @@ msgstr ""
 msgid "Update now"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:44
-#: includes/classes/admin/views/html-setup-ready.php:19
-#. translators: %1$s: link to docs
-#. translators: %1$s: link to developers resources
-msgid ""
-"Visit CoCart.dev to access <a href=\"%1$s\" target=\"_blank\" "
-"rel=\"noopener noreferrer\">developer resources</a>."
-msgstr ""
-
-#: includes/classes/admin/views/html-next-steps.php:49
+#: includes/classes/admin/views/html-next-steps.php:42
 msgid "Get product updates, tutorials and more straight to your inbox."
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:57
+#: includes/classes/admin/views/html-next-steps.php:45
+#: includes/classes/admin/views/html-next-steps.php:51
 msgid "Email address"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:63
-#: includes/classes/admin/views/html-next-steps.php:67
+#: includes/classes/admin/views/html-next-steps.php:57
+#: includes/classes/admin/views/html-next-steps.php:61
 msgid "Yes please!"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:76
+#: includes/classes/admin/views/html-next-steps.php:70
 msgid "Next step"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:77
+#: includes/classes/admin/views/html-next-steps.php:71
 msgid "Start Developing"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:78
+#: includes/classes/admin/views/html-next-steps.php:72
 msgid "You're ready to develop your headless store."
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:83
+#: includes/classes/admin/views/html-next-steps.php:77
 #: includes/classes/admin/woocommerce/notes/class-cocart-wc-admin-note-thanks-install.php:105
 msgid "View Documentation"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:90
+#: includes/classes/admin/views/html-next-steps.php:84
 msgid "Need something else?"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:91
+#: includes/classes/admin/views/html-next-steps.php:85
 msgid "Install Plugins"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:92
+#: includes/classes/admin/views/html-next-steps.php:86
 msgid "Checkout plugin suggestions by CoCart."
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:97
+#: includes/classes/admin/views/html-next-steps.php:91
 msgid "View Plugin Suggestions"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:104
+#: includes/classes/admin/views/html-next-steps.php:98
 msgid "You can also"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:116
-msgid "Unlock more features"
+#: includes/classes/admin/views/html-next-steps.php:111
+#. translators: %1$s: Hyperlink opening, %2$s: Hyperlink closing, %3$s: CoCart
+msgid ""
+"Is %3$s not translated in your language or do you spot errors with the "
+"current translations? Helping out is easy!"
 msgstr ""
 
-#: includes/classes/admin/views/html-next-steps.php:119
-msgid "Install VSCode Extension"
+#: includes/classes/admin/views/html-next-steps.php:124
+msgid "Community Support"
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:129
+#. translators: %s: CoCart
+msgid ""
+"Join the community on Discord to chat with us and fellow %s users. Share "
+"the store your building and your stack."
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:144
+msgid "Ready to Upgrade?"
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:145
+msgid ""
+"Fully unlock the cart API for coupons, shipping, fees, rate limiting, "
+"improved batch request support and more."
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:166
+msgid "left to upgrade with a 20% discount!"
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:172
+#: includes/classes/admin/views/html-next-steps.php:190
+msgid "View Pricing"
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:173
+msgid "Upgrade Now"
+msgstr ""
+
+#: includes/classes/admin/views/html-next-steps.php:216
+msgid "Share your experience on X/Twitter"
 msgstr ""
 
 #: includes/classes/admin/views/html-notice-base-table-missing.php:24
@@ -552,14 +570,13 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
-#: includes/classes/admin/views/html-notice-playground.php:32
-#. translators: %s: CoCart
+#: includes/classes/admin/views/html-notice-playground.php:29
 msgid ""
-"WordPress Playground is not compatible with the %s plugin. Recommend "
-"requesting a demo instead."
+"If WordPress Playground is having any issues. You can request a demo site "
+"instead."
 msgstr ""
 
-#: includes/classes/admin/views/html-notice-playground.php:40
+#: includes/classes/admin/views/html-notice-playground.php:34
 msgid "Request Demo"
 msgstr ""
 
@@ -581,6 +598,7 @@ msgstr ""
 
 #: includes/classes/admin/views/html-notice-please-review.php:54
 #: includes/classes/admin/views/html-notice-trying-beta.php:59
+#. translators: 1: Feedback URL, 2: CoCart, 3: Button Text
 msgid "Give Feedback"
 msgstr ""
 
@@ -604,8 +622,6 @@ msgid "Ok, you deserve it!"
 msgstr ""
 
 #: includes/classes/admin/views/html-notice-please-review.php:81
-#: includes/classes/admin/views/html-notice-setup-wizard.php:49
-#: includes/classes/admin/views/html-notice-trying-beta.php:62
 msgid "Hide this notice forever."
 msgstr ""
 
@@ -669,11 +685,6 @@ msgstr ""
 msgid ""
 "If you have any questions or any feedback at all, please let me know. Any "
 "little bit you're willing to share helps the development of CoCart."
-msgstr ""
-
-#: includes/classes/admin/views/html-notice-trying-beta.php:56
-#. translators: 1: Feedback URL, 2: CoCart, 3: Button Text
-msgid "Give Feedback for %2$s"
 msgstr ""
 
 #: includes/classes/admin/views/html-notice-trying-beta.php:62
@@ -778,61 +789,46 @@ msgstr ""
 msgid "Install WooCommerce"
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:23
+#: includes/classes/admin/views/html-setup-ready.php:17
 msgid "You're ready!"
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:29
+#: includes/classes/admin/views/html-setup-ready.php:23
 #. translators: %s: CoCart
 msgid ""
-"Now that you have %1$s installed, your ready to start developing your "
-"headless store."
+"Now that you have %s installed, your ready to start developing your "
+"headless store in modern and scalable storefront with confidence "
+"independent of WordPress using frameworks like Astro, React, Vue, or "
+"Next.js, gaining complete control over your customers experience no matter "
+"what your store sells."
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:40
-#. translators: %1$s: CoCart, %2$s: GitHub repository link
+#: includes/classes/admin/views/html-setup-ready.php:34
+#. translators: %1$s: link to frequently asked questions, %2$s: link to contact
+#. support
 msgid ""
-"In the documentation you will find references to the API routes available "
-"with some examples. If you want to modify or extend %1$s in any way, there "
-"are over 100+ action hooks and filters for developers to use that can "
-"customize %1$s to your specific needs, which you can <a href=\"%2$s\" "
-"target=\"_blank\" rel=\"noopener noreferrer\">search in the GitHub "
-"repository</a>."
+"If you have questions, please check out our most <a href=\"%1$s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">frequently asked "
+"questions</a>. If you don't find the answer your looking for, <a "
+"href=\"%2$s\">contact support</a>."
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:53
-#. translators: %1$s: CoCart, %2$s: Developers Hub link
-msgid ""
-"There is also a <a href=\"%2$s\" target=\"_blank\" rel=\"noopener "
-"noreferrer\">developers hub</a> where you can find all the resources you "
-"need to be productive with %1$s and keep track of everything that is "
-"happening with the plugin including development decisions and scoping of "
-"future versions."
-msgstr ""
-
-#: includes/classes/admin/views/html-setup-ready.php:63
-msgid ""
-"If in need of help, most common questions are answered and guides are "
-"provided on the developers hub. This is best place to look at first before "
-"contacting support."
-msgstr ""
-
-#: includes/classes/admin/views/html-setup-ready.php:71
+#: includes/classes/admin/views/html-setup-ready.php:46
 #. translators: %1$s: CoCart, %2$s: Discord
 msgid ""
 "Want to talk to someone about converting your WooCommerce store headless? "
 "Come join the %1$s community on %2$s."
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:78
+#: includes/classes/admin/views/html-setup-ready.php:53
 msgid "Thank you and enjoy!"
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:80
+#: includes/classes/admin/views/html-setup-ready.php:55
 msgid "Regards,"
 msgstr ""
 
-#: includes/classes/admin/views/html-setup-ready.php:92
+#: includes/classes/admin/views/html-setup-ready.php:67
 #. translators: %s: CoCart Headless, LLC
 msgid "Founder of %s"
 msgstr ""
@@ -1386,32 +1382,40 @@ msgstr ""
 msgid "%s is not a valid postcode / ZIP."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:414
+#: includes/classes/rest-api/class-cocart-authentication.php:460
+msgid "Authentication attempted but did not find valid login details."
+msgstr ""
+
+#: includes/classes/rest-api/class-cocart-authentication.php:462
 msgid "Authentication invalid!"
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:421
+#: includes/classes/rest-api/class-cocart-authentication.php:469
+msgid "User was not found when authenticating."
+msgstr ""
+
+#: includes/classes/rest-api/class-cocart-authentication.php:470
 msgid ""
 "Authentication is invalid. Please check your login details are correct and "
 "try again."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:426
+#: includes/classes/rest-api/class-cocart-authentication.php:475
 msgid "The password you entered is incorrect."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:533
+#: includes/classes/rest-api/class-cocart-authentication.php:582
 msgid "This filter is no longer used."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:668
-#: includes/classes/rest-api/class-cocart-authentication.php:687
-#: includes/classes/rest-api/class-cocart-authentication.php:703
+#: includes/classes/rest-api/class-cocart-authentication.php:717
+#: includes/classes/rest-api/class-cocart-authentication.php:736
+#: includes/classes/rest-api/class-cocart-authentication.php:752
 #. translators: 1: permission method, 2: api route
 msgid "Permission to %1$s %2$s is only permitted if the user is authenticated."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-authentication.php:717
+#: includes/classes/rest-api/class-cocart-authentication.php:766
 #. translators: %s: api route
 msgid "Unknown request method for %s."
 msgstr ""
@@ -1473,12 +1477,12 @@ msgstr ""
 msgid "Request returned nothing for \"%s\"! Please seek assistance."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-rest-api.php:545
-#: includes/classes/rest-api/class-cocart-rest-api.php:590
+#: includes/classes/rest-api/class-cocart-rest-api.php:551
+#: includes/classes/rest-api/class-cocart-rest-api.php:596
 msgid "User switching is now deprecated."
 msgstr ""
 
-#: includes/classes/rest-api/class-cocart-rest-api.php:566
+#: includes/classes/rest-api/class-cocart-rest-api.php:572
 #. translators: %1$s is previous ID, %2$s is current ID.
 msgid "User has changed! Was %1$s before and is now %2$s"
 msgstr ""
