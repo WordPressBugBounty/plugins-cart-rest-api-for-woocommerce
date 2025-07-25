@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart
  * @since   2.6.0
- * @version 4.5.0
+ * @version 4.6.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +28,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $version = '4.6.1';
+	public static $version = '4.6.2';
 
 	/**
 	 * CoCart Database Schema version.
@@ -67,7 +67,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $required_woo = '7.0';
+	public static $required_woo = '9.0';
 
 	/**
 	 * Required PHP Version
@@ -463,7 +463,6 @@ final class CoCart {
 	 */
 	public static function load_rest_api() {
 		require_once __DIR__ . '/classes/class-cocart-data-exception.php';
-		require_once __DIR__ . '/classes/rest-api/class-cocart-cart-cache.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-cart-callbacks.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-cart-extension.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-response.php';
@@ -551,11 +550,13 @@ final class CoCart {
 	 * @static
 	 *
 	 * @since 2.1.2 Introduced.
+	 * @since 4.6.2 Moved the cart cache to load once WooCommerce has loaded instead of only during the REST API.
 	 *
 	 * @return void
 	 */
 	public static function woocommerce() {
 		require_once __DIR__ . '/classes/class-cocart-woocommerce.php';
+		require_once __DIR__ . '/classes/class-cocart-cart-cache.php';
 	} // END woocommerce()
 
 	/**

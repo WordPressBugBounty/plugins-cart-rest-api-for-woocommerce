@@ -4,8 +4,8 @@ Tags: woocommerce, rest-api, decoupled, headless, cart
 Requires at least: 6.3
 Requires PHP: 7.4
 Tested up to: 6.8
-Stable tag: 4.6.1
-WC requires at least: 7.0
+Stable tag: 4.6.2
+WC requires at least: 9.0
 WC tested up to: 10.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -294,6 +294,36 @@ We’d love to hear what you have to say. [Share your experience](https://testim
 == Changelog ==
 
 📢 Only bug and security updates will be provided here on WordPress dot ORG. Any new major updates starting with v5.0 will be provided [directly from us](https://cocartapi.com?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink).
+
+= v4.6.2 - 25th July, 2025 =
+
+### Bug Fix
+
+* REST API: Removing an item stays removed. [Solves issue #534](https://github.com/co-cart/co-cart/issues/534)
+
+> WooCommerce v10 caused a cache issue due to a change in the many times session data is handled.
+
+### Improvement
+
+* Plugin: Session handler optimized - New sessions created first, then auth users if no cart requested.
+* Plugin: Session handler - Removed the need to set cart hash at the start.
+* Plugin: Session handler - Added a warning log for when the session data must have really screwed up.
+* Plugin: Session handler - Added max expiration exceed limit to 30 days to avoid performance issues and the session table growing too large.
+* REST API: Check REST request is CoCart before maybe loading cart or filtering served requests.
+* REST API: Fixed deprecated functions still called in Products API.
+* REST API: Authentication and CORS optimized to parse data less allowing for a faster response.
+* REST API: Moved global headers to be filtered in `rest_pre_serve_request` instead of `CoCart_Response` which is not used for Products API.
+* Plugin: Moved the cart cache to load once WooCommerce has loaded instead of only during the REST API.
+
+> Developer note: Cart cache allows for items with custom pricing to be calculated on the native site and not just via the REST API to keep consistent with calculations.
+
+### Requirements
+
+* WooCommerce v9 minimum is now required for CoCart but for best performance recommend using v10+
+
+### Compatibility
+
+* Tested with WooCommerce v10.0.4
 
 = v4.6.1 - 21st July, 2025 =
 

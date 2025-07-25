@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   2.1.2 Introduced.
- * @version 4.0.0
+ * @version 4.6.2
  */
 
 // Exit if accessed directly.
@@ -41,8 +41,8 @@ class CoCart_WooCommerce {
 		// Force WooCommerce to accept CoCart requests when authenticating.
 		add_filter( 'woocommerce_rest_is_request_to_rest_api', array( $this, 'allow_cocart_requests_wc' ) );
 
-		// Loads cart from session.
-		add_action( 'woocommerce_load_cart_from_session', array( $this, 'load_cart_from_session' ), 0 );
+		// Validate cart session requested.
+		add_action( 'woocommerce_load_cart_from_session', array( $this, 'validate_cart_requested' ), 0 );
 
 		// Delete user data.
 		add_action( 'delete_user', array( $this, 'delete_user_data' ) );
@@ -81,11 +81,10 @@ class CoCart_WooCommerce {
 	} // END allow_cocart_requests_wc()
 
 	/**
-	 * Loads a specific cart into session and merge cart contents
-	 * with a logged in customer if cart contents exist.
+	 * Validates the cart requested and warns user if accessing it incorrectly.
 	 *
 	 * Triggered when "woocommerce_load_cart_from_session" is called
-	 * to make sure the cart from session is loaded in time.
+	 * to make sure the cart from session is valid.
 	 *
 	 * THIS IS FOR REST API USE ONLY!
 	 *
@@ -93,10 +92,13 @@ class CoCart_WooCommerce {
 	 *
 	 * @static
 	 *
-	 * @since   2.1.0 Introduced.
-	 * @version 4.0.0
+	 * @since 2.1.0 Introduced.
+	 * @since 2.8.0 Set chosen shipping methods.
+	 * @since 2.9.1 Merge persistent cart with session and check REST is not requesting CoCart.
+	 * @since 3.0.0 Added check for WP-GraphQL requests.
+	 * @since 4.6.2 Simplified to avoid unnecessary checks.
 	 */
-	public static function load_cart_from_session() {
+	public static function validate_cart_requested() {
 		// Return nothing if WP-GraphQL is requested.
 		if ( function_exists( 'is_graphql_http_request' ) && is_graphql_http_request() ) {
 			return;
@@ -107,26 +109,15 @@ class CoCart_WooCommerce {
 			return;
 		}
 
-		$cookie = WC()->session->get_session_cookie();
-
-		$cart_key = '';
-
-		// If cookie exists then return cart key from it.
-		if ( $cookie ) {
-			$cart_key = $cookie[0];
-		}
-
 		// Check if we requested to load a specific cart.
-		if ( isset( $_REQUEST['cart_key'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$cart_key = trim( esc_html( wp_unslash( $_REQUEST['cart_key'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		}
+		$cart_key = WC()->session->get_requested_cart();
 
 		// Check if the user is logged in.
 		if ( is_user_logged_in() ) {
 			$customer_id = strval( get_current_user_id() );
 
 			// Compare the customer ID with the requested cart key. If they match then return error message.
-			if ( isset( $_REQUEST['cart_key'] ) && $customer_id === $_REQUEST['cart_key'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( ! empty( $cart_key ) && $customer_id === $cart_key ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$error = new WP_Error( 'cocart_already_authenticating_user', __( 'You are already authenticating as the customer. Cannot set cart key as the user.', 'cart-rest-api-for-woocommerce' ), array( 'status' => 403 ) );
 				wp_send_json_error( $error, 403 );
 				exit;
@@ -142,69 +133,9 @@ class CoCart_WooCommerce {
 			}
 		}
 
-		// Do nothing if the cart key is empty.
-		if ( empty( $cart_key ) ) {
-			return;
-		}
-
-		// Get requested cart.
-		$cart = WC()->session->get_session( $cart_key );
-
-		// Get current cart contents.
-		$cart_contents = WC()->session->get( 'cart', array() );
-
-		// Initialize merge cart array.
-		$merge_cart = array();
-
-		// Merge requested cart. - ONLY ITEMS, COUPONS AND FEES THAT ARE NOT APPLIED TO THE CART IN SESSION WILL MERGE!!!
-		if ( ! empty( $cart_key ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$applied_coupons       = WC()->session->get( 'applied_coupons', array() );
-			$removed_cart_contents = WC()->session->get( 'removed_cart_contents', array() );
-			$cart_fees             = WC()->session->get( 'cart_fees', array() );
-
-			$merge_cart['cart']                  = isset( $cart['cart'] ) ? maybe_unserialize( $cart['cart'] ) : array();
-			$merge_cart['applied_coupons']       = isset( $cart['applied_coupons'] ) ? maybe_unserialize( $cart['applied_coupons'] ) : array();
-			$merge_cart['applied_coupons']       = array_unique( array_merge( $applied_coupons, $merge_cart['applied_coupons'] ) ); // Merge applied coupons.
-			$merge_cart['removed_cart_contents'] = isset( $cart['removed_cart_contents'] ) ? maybe_unserialize( $cart['removed_cart_contents'] ) : array();
-			$merge_cart['removed_cart_contents'] = array_merge( $removed_cart_contents, $merge_cart['removed_cart_contents'] ); // Merge removed cart contents.
-			$merge_cart['cart_fees']             = isset( $cart['cart_fees'] ) ? maybe_unserialize( $cart['cart_fees'] ) : array();
-
-			// Check cart fees return as an array so not to crash if PHP 8 or higher is used.
-			if ( is_array( $merge_cart['cart_fees'] ) ) {
-				$merge_cart['cart_fees'] = array_merge( $cart_fees, $merge_cart['cart_fees'] ); // Merge cart fees.
-			}
-
-			// Checking if there is cart content to merge.
-			if ( ! empty( $merge_cart['cart'] ) ) {
-				$cart_contents = array_merge( $merge_cart['cart'], $cart_contents ); // Merge carts.
-			}
-		}
-
-		// Merge saved cart with current cart.
-		if ( ! empty( $cart_contents ) && strval( get_current_user_id() ) > 0 ) {
-			$saved_cart    = self::get_saved_cart();
-			$cart_contents = array_merge( $saved_cart, $cart_contents );
-		}
-
-		// Set cart for customer if not empty.
-		if ( ! empty( $cart ) ) {
-			WC()->session->set( 'cart', $cart_contents );
-			WC()->session->set( 'cart_totals', isset( $cart['cart_totals'] ) ? maybe_unserialize( $cart['cart_totals'] ) : array() );
-			WC()->session->set( 'applied_coupons', ! empty( $merge_cart['applied_coupons'] ) ? $merge_cart['applied_coupons'] : ( isset( $cart['applied_coupons'] ) ? maybe_unserialize( $cart['applied_coupons'] ) : array() ) );
-			WC()->session->set( 'coupon_discount_totals', isset( $cart['coupon_discount_totals'] ) ? maybe_unserialize( $cart['coupon_discount_totals'] ) : array() );
-			WC()->session->set( 'coupon_discount_tax_totals', isset( $cart['coupon_discount_tax_totals'] ) ? maybe_unserialize( $cart['coupon_discount_tax_totals'] ) : array() );
-			WC()->session->set( 'removed_cart_contents', ! empty( $merge_cart['removed_cart_contents'] ) ? $merge_cart['removed_cart_contents'] : ( isset( $cart['removed_cart_contents'] ) ? maybe_unserialize( $cart['removed_cart_contents'] ) : array() ) );
-
-			WC()->session->set( 'chosen_shipping_methods', ! empty( $cart['chosen_shipping_methods'] ) ? maybe_unserialize( $cart['chosen_shipping_methods'] ) : array() );
-
-			WC()->session->set( 'cart_fees', ! empty( $merge_cart['cart_fees'] ) ? $merge_cart['cart_fees'] : ( isset( $cart['cart_fees'] ) ? maybe_unserialize( $cart['cart_fees'] ) : array() ) );
-
-			// Checks for any items cached. - Added by CoCart in order to handle donation pricing mechanic.
-			if ( ! empty( $cart['cart_cached'] ) ) {
-				WC()->session->set( 'cart_cached', maybe_unserialize( $cart['cart_cached'] ) );
-			}
-		}
-	} // END load_cart_from_session()
+		// Add explicit return for successful validation.
+		return true;
+	} // END validate_cart_requested()
 
 	/**
 	 * When a user is deleted in WordPress, delete corresponding CoCart data.
