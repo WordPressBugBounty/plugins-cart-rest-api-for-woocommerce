@@ -77,6 +77,8 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	 * Init hooks and cart data.
 	 *
 	 * @uses CoCart::is_rest_api_request()
+	 * @uses CoCart_Session_Handler::init_session_cocart()
+	 * @uses WC_Session_Handler::init()
 	 *
 	 * @access public
 	 *
@@ -550,6 +552,22 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	} // END get_session()
 
 	/**
+	 * Delete the session from the cache and database.
+	 *
+	 * @since 4.6.4 Introduced.
+	 *
+	 * @param string $customer_id Customer session ID.
+	 */
+	public function delete_session( $customer_id ) {
+		if ( ! $customer_id ) {
+			return;
+		}
+
+		$GLOBALS['wpdb']->delete( $this->_table, array( 'cart_key' => $customer_id ) );
+		wp_cache_delete( $this->get_cache_prefix() . $customer_id, COCART_CART_CACHE_GROUP );
+	} // END delete_session()
+
+	/**
 	 * Update cart.
 	 *
 	 * @access public
@@ -714,21 +732,25 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	 * @param int    $timestamp Timestamp to expire the cookie.
 	 */
 	public function update_session_timestamp( $customer_id, $timestamp ) {
-		global $wpdb;
+		if ( ! $customer_id ) {
+			return;
+		}
 
-		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->_table,
-			array(
-				'cart_expiry' => $timestamp,
-			),
-			array(
-				'cart_key' => $customer_id,
-			),
-			array(
-				'%d',
-			)
-		);
+		$GLOBALS['wpdb']->update( $this->_table, array( 'cart_expiry' => $timestamp ), array( 'cart_key' => $customer_id ), array( '%d' ) );
 	} // END update_session_timestamp()
+
+	/**
+	 * Check if a session exists in the database.
+	 *
+	 * @since 4.6.4 Introduced.
+	 *
+	 * @param string $customer_id Customer ID.
+	 *
+	 * @return bool
+	 */
+	private function session_exists( $customer_id ) {
+		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT cart_key FROM %i WHERE cart_key = %s', $this->_table, $customer_id ) );
+	} // END session_exists()
 
 	/* Functions below this line are deprecated! */
 
