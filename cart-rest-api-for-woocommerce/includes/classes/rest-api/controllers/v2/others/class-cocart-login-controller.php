@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\API\v2
  * @since   3.0.0 Introduced.
- * @version 4.0.0
+ * @version 4.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,6 +58,7 @@ class CoCart_REST_Login_V2_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'login' ),
 					'permission_callback' => array( $this, 'get_permission_callback' ),
+					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -91,7 +92,8 @@ class CoCart_REST_Login_V2_Controller {
 	 * @return WP_REST_Response The returned response.
 	 */
 	public function login() {
-		$current_user = get_userdata( get_current_user_id() );
+		$current_user_id = get_current_user_id();
+		$current_user    = get_userdata( $current_user_id );
 
 		$user_roles = $current_user->roles;
 
@@ -102,7 +104,7 @@ class CoCart_REST_Login_V2_Controller {
 		}
 
 		$response = array(
-			'user_id'      => strval( get_current_user_id() ),
+			'user_id'      => strval( $current_user_id ),
 			'first_name'   => $current_user->first_name,
 			'last_name'    => $current_user->last_name,
 			'display_name' => esc_html( $current_user->display_name ),
@@ -114,8 +116,8 @@ class CoCart_REST_Login_V2_Controller {
 			 *
 			 * @since 3.8.1 Introduced.
 			 *
-			 * @param array $extra_information The extra information.
-			 * @param object $current_user The current user.
+			 * @param array  $extra_information The extra information.
+			 * @param object $current_user      The current user.
 			 */
 			'extras'       => apply_filters( 'cocart_login_extras', array(), $current_user ),
 			'dev_note'     => __( "Don't forget to store the users login information in order to authenticate all other routes with CoCart.", 'cart-rest-api-for-woocommerce' ),
@@ -198,4 +200,34 @@ class CoCart_REST_Login_V2_Controller {
 			),
 		);
 	} // END get_public_item_schema()
+
+	/**
+	 * Get the query params for login.
+	 *
+	 * @access public
+	 *
+	 * @since 4.7.0 Introduced.
+	 *
+	 * @return array $params The query params.
+	 */
+	public function get_collection_params() {
+		$params = array(
+			'username' => array(
+				'description'       => __( 'Username, email, or phone number for authentication.', 'cart-rest-api-for-woocommerce' ),
+				'type'              => 'string',
+				'required'          => false,
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'password' => array(
+				'description'       => __( 'Password for authentication.', 'cart-rest-api-for-woocommerce' ),
+				'type'              => 'string',
+				'required'          => false,
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+		);
+
+		return $params;
+	} // END get_collection_params()
 } // END class
