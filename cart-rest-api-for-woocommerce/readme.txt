@@ -4,9 +4,9 @@ Tags: woocommerce, rest-api, decoupled, headless, cart
 Requires at least: 6.3
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 4.8.3
+Stable tag: 4.8.4
 WC requires at least: 9.0
-WC tested up to: 10.4
+WC tested up to: 10.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -299,12 +299,28 @@ We’d love to hear what you have to say. [Share your experience](https://testim
 
 == Changelog ==
 
-📢 Only bug and security updates will be provided here on WordPress dot ORG. Any new major updates starting with v5.0 will be provided [directly from us](https://cocartapi.com?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink).
+📢 Only bug and security updates will be provided here on WordPress dot ORG. Major updates or new features are provided [directly from us](https://cocartapi.com?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink).
+
+This is a community edition of the core of CoCart. Response time for support is slower than paying customers. Thank you for your understanding.
+
+> Plugin name change showing before and after below.
 
 **Before**: Headless eCommerce API for Developers
 **Now**: CoCart - Headless REST API for WooCommerce
 
-In your WordPress dashboard under "Plugins", you will see it labeled as "CoCart API - Headless eCommerce API for WooCommerce", before "CoCart API - Headless WooCommerce Made Easy".
+= v4.8.4 - 21st April, 2026 =
+
+### Bug Fixes
+
+* Plugin: Fixed fatal error from `sprint_f()` typo in database update scheduler (`sprintf`).
+* REST API: Apply `Access-Control-Allow-Credentials` header correctly.
+* Load Cart: Only trigger warning if hook `cocart_load_cart_override` was used.
+* Load Cart: Fixed uncaught type error merging an empty cart value. Reported by [@allkhor](https://github.com/allkhor) 👍
+* WordPress Dashboard: Fixed HTML issue in the WooCommerce admin bar title.
+
+### Compatibility
+
+* Tested with WooCommerce v10.7
 
 = v4.8.3 - 26th January, 2026 =
 

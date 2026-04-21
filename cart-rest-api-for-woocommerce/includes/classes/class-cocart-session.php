@@ -215,7 +215,7 @@ class CoCart_Load_Cart {
 
 			$new_cart = array();
 
-			$new_cart['cart']                       = isset( $requested_cart['cart'] ) ? maybe_unserialize( $requested_cart['cart'] ) : null;
+			$new_cart['cart']                       = isset( $requested_cart['cart'] ) ? maybe_unserialize( $requested_cart['cart'] ) : array();
 			$new_cart['cart_totals']                = isset( $requested_cart['cart_totals'] ) ? maybe_unserialize( $requested_cart['cart_totals'] ) : null;
 			$new_cart['applied_coupons']            = isset( $requested_cart['applied_coupons'] ) ? maybe_unserialize( $requested_cart['applied_coupons'] ) : null;
 			$new_cart['coupon_discount_totals']     = isset( $requested_cart['coupon_discount_totals'] ) ? maybe_unserialize( $requested_cart['coupon_discount_totals'] ) : null;
@@ -235,10 +235,12 @@ class CoCart_Load_Cart {
 				$new_cart['cart_cached'] = maybe_unserialize( $requested_cart['cart_cached'] );
 			}
 
-			cocart_deprecated_hook( 'cocart_load_cart_override', '4.6.4' );
+			cocart_do_deprecated_action( 'cocart_load_cart_override', '4.6.4' );
 
 			// Check if we are keeping the cart currently set via the web.
-			if ( ! empty( $_GET['keep-cart'] ) && is_bool( $_GET['keep-cart'] ) !== true ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$keep_cart = ! empty( $_GET['keep-cart'] ) && filter_var( wp_unslash( $_GET['keep-cart'] ), FILTER_VALIDATE_BOOLEAN ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( $keep_cart ) {
 				$new_cart_content = array_merge( $new_cart['cart'], maybe_unserialize( $cart_in_session ) );
 				/**
 				 * Filter allows you to adjust the merged cart contents.
@@ -288,7 +290,7 @@ class CoCart_Load_Cart {
 
 			// Sets the PHP session data for the loaded cart.
 			// If either cart, applied_coupons, coupon_discount_totals, coupon_discount_tax_totals or removed_cart_contents are not set then they are nulled as fallback.
-			$wc_session->set( 'cart', ! empty( $new_cart['cart'] ) ? maybe_unserialize( $new_cart['cart'] ) : null );
+			$wc_session->set( 'cart', ! empty( $new_cart['cart'] ) ? maybe_unserialize( $new_cart['cart'] ) : array() );
 			$wc_session->set( 'cart_totals', ! empty( $new_cart['cart_totals'] ) ? maybe_unserialize( $new_cart['cart_totals'] ) : null );
 			$wc_session->set( 'applied_coupons', ! empty( $new_cart['applied_coupons'] ) ? maybe_unserialize( $new_cart['applied_coupons'] ) : null );
 			$wc_session->set( 'coupon_discount_totals', ! empty( $new_cart['applied_coupons'] ) ? maybe_unserialize( $new_cart['coupon_discount_totals'] ) : null );
