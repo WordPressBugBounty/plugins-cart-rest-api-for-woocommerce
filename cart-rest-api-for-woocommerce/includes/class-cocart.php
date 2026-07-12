@@ -1,11 +1,12 @@
 <?php
 /**
- * CoCart core setup.
+ * CoCart Community setup.
  *
  * @author  Sébastien Dumont
  * @package CoCart
  * @since   2.6.0
- * @version 4.6.2
+ * @version 4.9.0
+ * @license GPL-3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +29,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $version = '4.8.4';
+	public static $version = '4.9.0';
 
 	/**
 	 * CoCart Database Schema version.
@@ -44,7 +45,20 @@ final class CoCart {
 	public static $db_version = '4.3.23';
 
 	/**
-	 * Required WordPress Version
+	 * Tested up to WordPress version.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 4.9.0 Introduced.
+	 *
+	 * @var string
+	 */
+	public static $tested_up_to_wp = '6.9';
+
+	/**
+	 * Required WordPress version.
 	 *
 	 * @access public
 	 *
@@ -54,10 +68,10 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $required_wp = '6.3';
+	public static $required_wp = '6.7';
 
 	/**
-	 * Required WooCommerce Version
+	 * Required WooCommerce version.
 	 *
 	 * @access public
 	 *
@@ -70,7 +84,7 @@ final class CoCart {
 	public static $required_woo = '9.0';
 
 	/**
-	 * Required PHP Version
+	 * Required PHP version.
 	 *
 	 * @access public
 	 *
@@ -78,7 +92,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $required_php = '7.4';
+	public static $required_php = '8.2';
 
 	/**
 	 * Cloning is forbidden.
@@ -114,8 +128,6 @@ final class CoCart {
 	public static function init() {
 		self::setup_constants();
 		self::includes();
-		self::include_extension_compatibility();
-		self::include_third_party();
 
 		// Install CoCart upon activation.
 		register_activation_hook( COCART_FILE, array( __CLASS__, 'install_cocart' ) );
@@ -128,6 +140,9 @@ final class CoCart {
 		add_action( 'woocommerce_loaded', array( __CLASS__, 'cocart_tasks' ) );
 		add_action( 'woocommerce_loaded', array( __CLASS__, 'woocommerce' ) );
 		add_action( 'woocommerce_loaded', array( __CLASS__, 'background_updater' ) );
+
+		// Load integrations (compatibility modules + third-party plugin support).
+		add_action( 'init', array( __CLASS__, 'include_integrations' ), 5 );
 
 		// Load translation files.
 		add_action( 'init', array( __CLASS__, 'load_plugin_textdomain' ), 0 );
@@ -151,13 +166,17 @@ final class CoCart {
 	 * @static
 	 *
 	 * @since   1.2.0 Introduced.
-	 * @version 4.5.0
+	 * @version 4.9.0
 	 */
 	public static function setup_constants() {
 		self::define( 'COCART_ABSPATH', dirname( COCART_FILE ) . '/' );
 		self::define( 'COCART_PLUGIN_BASENAME', plugin_basename( COCART_FILE ) );
 		self::define( 'COCART_VERSION', self::$version );
 		self::define( 'COCART_DB_VERSION', self::$db_version );
+		self::define( 'COCART_TESTED_WP', self::$tested_up_to_wp );
+		self::define( 'COCART_REQUIRED_WP', self::$required_wp );
+		self::define( 'COCART_REQUIRED_PHP', self::$required_php );
+		self::define( 'COCART_REQUIRED_WOO', self::$required_woo );
 		self::define( 'COCART_SLUG', 'cart-rest-api-for-woocommerce' );
 		self::define( 'COCART_URL_PATH', untrailingslashit( plugins_url( '/', COCART_FILE ) ) );
 		self::define( 'COCART_FILE_PATH', untrailingslashit( plugin_dir_path( COCART_FILE ) ) );
@@ -168,10 +187,9 @@ final class CoCart {
 		self::define( 'COCART_REVIEW_URL', 'https://testimonial.to/cocart' );
 		self::define( 'COCART_SUGGEST_FEATURE', 'https://cocartapi.com/suggest-a-feature/' );
 		self::define( 'COCART_COMMUNITY_URL', 'https://cocartapi.com/community/' );
-		self::define( 'COCART_DOCUMENTATION_URL', 'https://cocartapi.com/docs/' );
+		self::define( 'COCART_DOCUMENTATION_URL', 'https://docs.cocartapi.com/' );
 		self::define( 'COCART_TRANSLATION_URL', 'https://translate.cocartapi.com/projects/cart-rest-api-for-woocommerce/' );
 		self::define( 'COCART_REPO_URL', 'https://github.com/co-cart/co-cart' );
-		self::define( 'COCART_NEXT_VERSION', '5.0.0' );
 	} // END setup_constants()
 
 	/**
@@ -287,6 +305,9 @@ final class CoCart {
 		include_once __DIR__ . '/cocart-deprecated-functions.php';
 		include_once __DIR__ . '/cocart-formatting-functions.php';
 
+		// Integration Registry — must load before compatibility and third-party modules.
+		include_once __DIR__ . '/classes/class-cocart-integrations.php';
+
 		// Core classes.
 		require_once __DIR__ . '/classes/class-cocart-helpers.php';
 		require_once __DIR__ . '/classes/class-cocart-install.php';
@@ -313,7 +334,7 @@ final class CoCart {
 		 */
 		if (
 			! defined( 'COCART_WHITE_LABEL' ) ||
-			false === COCART_WHITE_LABEL && is_admin() ||
+			( false === COCART_WHITE_LABEL && is_admin() ) ||
 			( defined( 'WP_CLI' ) && WP_CLI )
 		) {
 			require_once __DIR__ . '/classes/admin/class-cocart-admin.php';
@@ -341,30 +362,17 @@ final class CoCart {
 	} // END background_updater()
 
 	/**
-	 * Include extension compatibility.
+	 * Include all integrations (compatibility modules + third-party plugin support).
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
-	 * @since 3.0.0 Introduced.
+	 * @since 4.9.0 Introduced.
 	 */
-	public static function include_extension_compatibility() {
-		require_once __DIR__ . '/compatibility/class-cocart-compatibility.php';
-	} // END include_extension_compatibility()
-
-	/**
-	 * Include third party support.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.8.1 Introduced.
-	 */
-	public static function include_third_party() {
-		require_once __DIR__ . '/third-party/class-cocart-third-party.php';
-	} // END include_third_party()
+	public static function include_integrations(): void {
+		CoCart_Integrations::load();
+	} // END include_integrations()
 
 	/**
 	 * Install CoCart upon activation.
@@ -413,7 +421,7 @@ final class CoCart {
 			self::deactivate_plugin();
 			wp_die(
 				sprintf(
-					/* translators: %1$s: CoCart Core, %2$s: CoCart Plus */
+					/* translators: %1$s: CoCart, %2$s: CoCart Plus */
 					esc_html__( '%1$s is not required as it is already packaged within %2$s', 'cart-rest-api-for-woocommerce' ),
 					'CoCart',
 					'CoCart Plus'
@@ -425,7 +433,7 @@ final class CoCart {
 			self::deactivate_plugin();
 			wp_die(
 				sprintf(
-					/* translators: %1$s: CoCart Core, %2$s: CoCart Pro */
+					/* translators: %1$s: CoCart, %2$s: CoCart Pro */
 					esc_html__( '%1$s is not required as it is already packaged within %2$s', 'cart-rest-api-for-woocommerce' ),
 					'CoCart',
 					'CoCart Pro'
@@ -463,7 +471,13 @@ final class CoCart {
 	 * @since 4.1.0  Moved REST API classes to load ONLY when the REST API is used.
 	 */
 	public static function load_rest_api() {
+		// Prevent CoCart running in the backend should the REST API server be called by another plugin.
+		if ( is_admin() ) {
+			return;
+		}
+
 		require_once __DIR__ . '/classes/class-cocart-data-exception.php';
+		require_once __DIR__ . '/classes/rest-api/class-cocart-etag.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-cart-callbacks.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-cart-extension.php';
 		require_once __DIR__ . '/classes/rest-api/class-cocart-response.php';
@@ -477,13 +491,13 @@ final class CoCart {
 	/**
 	 * Returns true if we are making a REST API request for CoCart.
 	 *
-	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
-	 *
 	 * @access public
 	 *
 	 * @static
 	 *
 	 * @since 2.1.0 Introduced.
+	 * @since 4.2.0 Moved to main class.
+	 * @since 4.9.0 Recognize requests made via the WordPress REST API batch endpoint.
 	 *
 	 * @return bool
 	 */
@@ -492,9 +506,16 @@ final class CoCart {
 			return false;
 		}
 
-		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$request_uri         = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		$is_rest_api_request = ( false !== strpos( $request_uri, $rest_prefix . 'cocart/' ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$is_rest_api_request = ( false !== strpos( $request_uri, $rest_prefix . 'cocart/' ) );
+
+		// Requests sent via the WP REST API batch endpoint share the cart, session and
+		// customer for every sub-request dispatched, so return true to accept them.
+		if ( ! $is_rest_api_request ) {
+			$is_rest_api_request = ( false !== strpos( $request_uri, $rest_prefix . 'batch/v1' ) );
+		}
 
 		/**
 		 * Filters the REST API requested.
@@ -586,30 +607,23 @@ final class CoCart {
 	/**
 	 * Load the plugin translations if any ready.
 	 *
-	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
+	 * Note: the first-loaded translation file takes priority over any following ones if the same translation is present.
 	 *
 	 * Locales found in:
 	 *      - WP_LANG_DIR/cart-rest-api-for-woocommerce/cart-rest-api-for-woocommerce-LOCALE.mo
-	 *      - WP_LANG_DIR/plugins/cart-rest-api-for-woocommerce-LOCALE.mo
+	 *      - PLUGIN_DIR/languages/cart-rest-api-for-woocommerce-LOCALE.mo
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
-	 * @since   1.0.0 Introduced.
-	 * @version 4.3.7
+	 * @since 1.0.0 Introduced.
 	 */
 	public static function load_plugin_textdomain() {
-		if ( function_exists( 'determine_locale' ) ) {
-			$locale = determine_locale();
-		} else {
-			$locale = is_admin() ? get_user_locale() : get_locale();
-		}
-
-		$locale = apply_filters( 'plugin_locale', $locale, COCART_SLUG ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+		$locale = determine_locale();
 
 		unload_textdomain( COCART_SLUG );
 		load_textdomain( COCART_SLUG, WP_LANG_DIR . '/' . COCART_SLUG . '/' . COCART_SLUG . '-' . $locale . '.mo' );
-		load_plugin_textdomain( COCART_SLUG, false, plugin_basename( dirname( COCART_FILE ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
+		load_textdomain( COCART_SLUG, plugin_dir_path( COCART_FILE ) . 'languages/' . COCART_SLUG . '-' . $locale . '.mo' );
 	} // END load_plugin_textdomain()
 } // END class

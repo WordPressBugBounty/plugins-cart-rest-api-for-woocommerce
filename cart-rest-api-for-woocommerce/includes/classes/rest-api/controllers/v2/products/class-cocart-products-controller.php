@@ -387,8 +387,15 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 	protected function get_images( $product ) {
 		cocart_deprecated_function( 'CoCart_REST_Products_V2_Controller::get_images', '4.2.0', 'CoCart_Utilities_Product_Helpers::get_images' );
 
-		$images           = array();
-		$attachment_ids   = array();
+		$images         = array();
+		$attachment_ids = array();
+		/**
+		 * Filter the image sizes available for product images.
+		 *
+		 * @since 3.1.0 Introduced.
+		 *
+		 * @param array $sizes Available image sizes.
+		 */
 		$attachment_sizes = apply_filters( 'cocart_products_image_sizes', array_merge( get_intermediate_image_sizes(), array( 'full', 'custom' ) ) );
 
 		// Add featured image.
@@ -493,8 +500,8 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 			'parent_id'          => $product->get_parent_id( 'view' ),
 			'name'               => $product->get_name( 'view' ),
 			'type'               => $type,
-			'slug'               => $product->get_slug( 'view' ),
-			'permalink'          => $product->get_permalink(),
+			'slug'               => urldecode( $product->get_slug( 'view' ) ),
+			'permalink'          => urldecode( $product->get_permalink() ),
 			'sku'                => $product->get_sku( 'view' ),
 			'description'        => $product->get_description( 'view' ),
 			'short_description'  => $product->get_short_description( 'view' ),
@@ -645,7 +652,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 			$terms[] = array(
 				'id'       => $term->term_id,
 				'name'     => $term->name,
-				'slug'     => $term->slug,
+				'slug'     => urldecode( $term->slug ),
 				'rest_url' => $this->product_rest_url( $term->term_id, $taxonomy ),
 			);
 		}
@@ -678,14 +685,14 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 			);
 
 			foreach ( $terms as $term ) {
-				$attributes[ $term->slug ] = $term->name;
+				$attributes[ urldecode( $term->slug ) ] = $term->name;
 			}
 		} elseif ( isset( $attribute['value'] ) ) {
 			$options = explode( '|', $attribute['value'] );
 
 			foreach ( $options as $attribute ) {
-				$slug                = trim( $attribute );
-				$attributes[ $slug ] = trim( $attribute );
+				$slug                = sanitize_title( $attribute );
+				$attributes[ $slug ] = rawurldecode( $attribute );
 			}
 		}
 
@@ -720,14 +727,14 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 				$attribute_prefix = 0 === strpos( $attribute_name, 'attribute_pa_' ) ? 'attribute_pa_' : 'attribute_';
 
 				// Determine the attribute option.
-				$option = array( $attribute => $attribute );
+				$option = array( sanitize_title( $attribute ) => rawurldecode( $attribute ) );
 
 				if ( 'attribute_pa_' === $attribute_prefix ) {
 					// If the attribute is taxonomy-based, fetch the term.
 					$option_term = get_term_by( 'slug', $attribute, $name );
 
 					// Set the option accordingly.
-					$option = $option_term && ! is_wp_error( $option_term ) ? array( $option_term->slug => $option_term->name ) : $option;
+					$option = $option_term && ! is_wp_error( $option_term ) ? array( urldecode( $option_term->slug ) => $option_term->name ) : $option;
 				}
 
 				$attributes[ 'attribute_' . $name ] = array(
@@ -776,7 +783,25 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 				break;
 			case 'related':
 			default:
-				$ids = array_map( 'absint', array_values( wc_get_related_products( $product->get_id(), apply_filters( 'cocart_products_get_related_products_limit', 5 ), apply_filters( 'cocart_products_get_related_products_exclude_ids', array() ) ) ) );
+				/**
+				 * Filter the maximum number of related products to return.
+				 *
+				 * @since 3.1.0 Introduced.
+				 *
+				 * @param int $limit Maximum number of related products. Default 5.
+				 */
+				$related_limit = apply_filters( 'cocart_products_get_related_products_limit', 5 );
+
+				/**
+				 * Filter the product IDs to exclude from related products.
+				 *
+				 * @since 3.1.0 Introduced.
+				 *
+				 * @param array $exclude_ids Product IDs to exclude.
+				 */
+				$related_exclude = apply_filters( 'cocart_products_get_related_products_exclude_ids', array() );
+
+				$ids = array_map( 'absint', array_values( wc_get_related_products( $product->get_id(), $related_limit, $related_exclude ) ) );
 				break;
 		}
 
@@ -794,7 +819,7 @@ class CoCart_REST_Products_V2_Controller extends CoCart_Products_Controller {
 					$connected_products[] = array(
 						'id'          => $id,
 						'name'        => $_product->get_name( 'view' ),
-						'permalink'   => $_product->get_permalink(),
+						'permalink'   => urldecode( $_product->get_permalink() ),
 						'price'       => cocart_prepare_money_response( $_product->get_price( 'view' ), wc_get_price_decimals() ),
 						'add_to_cart' => array(
 							'text'        => $_product->add_to_cart_text(),

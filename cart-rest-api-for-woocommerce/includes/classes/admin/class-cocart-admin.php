@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Admin
  * @since   1.2.0
- * @version 4.0.0
+ * @version 4.9.0
  * @license GPL-2.0+
  */
 
@@ -44,6 +44,10 @@ if ( ! class_exists( 'CoCart_Admin' ) ) {
 		 * @since 1.2.0 Introduced.
 		 */
 		public function includes() {
+			if ( ! is_admin() ) {
+				return;
+			}
+
 			// Required files.
 			include_once __DIR__ . '/abstract/abstract-class-submenu-page.php';                     // Admin Abstracts.
 			require_once __DIR__ . '/class-cocart-admin-assets.php';                                // Admin Assets.
@@ -61,7 +65,10 @@ if ( ! class_exists( 'CoCart_Admin' ) ) {
 			include_once __DIR__ . '/woocommerce/class-cocart-wc-admin-system-status.php';          // WooCommerce System Status.
 
 			// Pages.
+			require_once __DIR__ . '/class-cocart-admin-settings-renderer.php';                    // Settings Renderer.
+			require_once __DIR__ . '/pages/class-cocart-admin-pages-settings.php';                  // Settings page.
 			require_once __DIR__ . '/pages/class-cocart-admin-pages-support.php';                   // Support.
+			require_once __DIR__ . '/pages/class-cocart-admin-pages-integrations.php';              // Integrations page.
 			require_once __DIR__ . '/class-cocart-admin-setup-wizard.php';                          // Setup Wizard.
 		} // END includes()
 
@@ -112,6 +119,13 @@ if ( ! class_exists( 'CoCart_Admin' ) ) {
 			}
 
 			// Setup wizard redirect.
+			/**
+			 * Filter to enable or disable the setup wizard.
+			 *
+			 * @since 2.6.0 Introduced.
+			 *
+			 * @param bool $enable_setup_wizard True to enable, false to disable.
+			 */
 			if ( get_transient( '_cocart_activation_redirect' ) && apply_filters( 'cocart_enable_setup_wizard', true ) ) {
 				$do_redirect  = true;
 				$current_page = isset( $_GET['page'] ) ? wc_clean( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -121,8 +135,17 @@ if ( ! class_exists( 'CoCart_Admin' ) ) {
 					$do_redirect = false;
 				}
 
+				/**
+				 * Filter to prevent the automatic setup wizard redirect.
+				 *
+				 * @since 2.6.0 Introduced.
+				 *
+				 * @param bool $prevent True to prevent redirect, false to allow.
+				 */
+				$prevent_redirect = apply_filters( 'cocart_prevent_automatic_wizard_redirect', false );
+
 				// On these pages, or during these events, disable the redirect.
-				if ( 'cocart-setup' === $current_page || ! CoCart_Admin_Notices::has_notice( 'setup_wizard' ) || apply_filters( 'cocart_prevent_automatic_wizard_redirect', false ) || isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( 'cocart-setup' === $current_page || ! CoCart_Admin_Notices::has_notice( 'setup_wizard' ) || $prevent_redirect || isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					delete_transient( '_cocart_activation_redirect' );
 					$do_redirect = false;
 				}

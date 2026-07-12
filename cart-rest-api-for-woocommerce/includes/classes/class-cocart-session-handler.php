@@ -5,7 +5,7 @@
  * @author  Sébastien Dumont
  * @package CoCart\Classes
  * @since   2.1.0 Introduced.
- * @version 4.4.0
+ * @version 4.9.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -291,17 +291,20 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	 * @access public
 	 */
 	public function set_cart_expiration() {
-		$expiring_seconds   = DAY_IN_SECONDS;
-		$expiration_seconds = 2 * DAY_IN_SECONDS;
+		static $guest_expiration    = null;
+		static $loggedin_expiration = null;
 
+		if ( null === $guest_expiration || null === $loggedin_expiration ) {
+			$session_settings    = get_option( 'cocart_settings', array() )['session'] ?? array();
+			$guest_expiration    = isset( $session_settings['guest_expiration_days'] ) ? (int) $session_settings['guest_expiration_days'] * DAY_IN_SECONDS : 2 * DAY_IN_SECONDS;
+			$loggedin_expiration = isset( $session_settings['loggedin_expiration_days'] ) ? (int) $session_settings['loggedin_expiration_days'] * DAY_IN_SECONDS : WEEK_IN_SECONDS;
+		}
+
+		$expiring_seconds       = DAY_IN_SECONDS;
+		$expiration_seconds     = is_user_logged_in() ? $loggedin_expiration : $guest_expiration;
 		$max_expiration_seconds = MONTH_IN_SECONDS;
 		$max_expiring_seconds   = $max_expiration_seconds - DAY_IN_SECONDS;
 		$session_limit_exceeded = false;
-
-		// Set expiration time for logged in users.
-		if ( is_user_logged_in() ) {
-			$expiration_seconds = WEEK_IN_SECONDS;
-		}
 
 		/**
 		 * Filter allows you to change the amount of time before the cart starts to expire.
@@ -314,8 +317,8 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 		 */
 		$expiring_seconds = intval( apply_filters( 'cocart_cart_expiring', $expiring_seconds, is_user_logged_in() ) ) ?: $expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
+		// If the expiring time is greater than the maximum expiring time, set the session limit exceeded flag to true.
 		if ( $expiring_seconds > $max_expiring_seconds ) {
-			$expiring_seconds       = $max_expiring_seconds;
 			$session_limit_exceeded = true;
 		}
 
@@ -330,9 +333,8 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 		 */
 		$expiration_seconds = intval( apply_filters( 'cocart_cart_expiration', $expiration_seconds, is_user_logged_in() ) ) ?: $expiration_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
-		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
+		// If the expiration time is greater than the maximum expiration time, set the session limit exceeded flag to true.
 		if ( $expiration_seconds > $max_expiration_seconds ) {
-			$expiration_seconds     = $max_expiration_seconds;
 			$session_limit_exceeded = true;
 		}
 
@@ -342,7 +344,7 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 				\CoCart_Logger::log(
 					sprintf(
 						/* translators: %d = Expiration in seconds. */
-						esc_html__( 'Keeping sessions for longer than %d days results in performance issues, expiry has been capped.', 'cart-rest-api-for-woocommerce' ),
+						esc_html__( 'Keeping sessions for longer than %d days can cause performance issues and larger session tables. Monitor usage and adjust lifetimes via the cocart_cart_expiring and cocart_cart_expiration filters as needed.', 'cart-rest-api-for-woocommerce' ),
 						$max_expiration_seconds / DAY_IN_SECONDS
 					),
 					'warning'
@@ -426,7 +428,7 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 			}
 
 			// Check the source to determine cart expiration to utilize.
-			if ( $this->cart_source === 'cocart' ) {
+			if ( 'cocart' === $this->cart_source ) {
 				$cart_expiration = (int) $this->cart_expiration;
 			} else {
 				$cart_expiration = (int) $this->_session_expiration;
@@ -462,7 +464,10 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 				)
 			);
 
-			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, COCART_CART_CACHE_GROUP, $cart_expiration - time() );
+			$cache_ttl = $cart_expiration - time();
+			if ( $cache_ttl > 0 ) {
+				wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, COCART_CART_CACHE_GROUP, $cache_ttl );
+			}
 
 			/**
 			 * Hook: Fires after session data is saved.
@@ -567,9 +572,9 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 				$value = $default_value;
 			}
 
-			$cache_duration = $this->cart_expiration - time();
+			$cache_duration = $this->get_cache_expiration() - time();
 			if ( 0 < $cache_duration ) {
-				wp_cache_add( $this->get_cache_prefix() . $cart_key, $value, COCART_CART_CACHE_GROUP, $cache_duration );
+				wp_cache_set( $this->get_cache_prefix() . $cart_key, $value, COCART_CART_CACHE_GROUP, $cache_duration );
 			}
 		}
 
@@ -604,16 +609,24 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	public function update_cart( $cart_key ) {
 		global $wpdb;
 
+		$cart_expiration = $this->get_cache_expiration();
+
 		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$this->_table,
 			array(
 				'cart_value'  => maybe_serialize( $this->_data ),
-				'cart_expiry' => (int) $this->cart_expiration,
+				'cart_expiry' => (int) $cart_expiration,
 			),
 			array( 'cart_key' => $cart_key ),
 			array( '%s', '%d' ),
 			array( '%s' )
 		);
+
+		// Sync the object cache with the database.
+		$cache_ttl = $cart_expiration - time();
+		if ( $cache_ttl > 0 ) {
+			wp_cache_set( $this->get_cache_prefix() . $cart_key, $this->_data, COCART_CART_CACHE_GROUP, $cache_ttl );
+		}
 	} // END update_cart()
 
 	/**
@@ -669,7 +682,7 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 		$cart_totals  = $this->get( 'cart_totals' );
 
 		$cart_total = isset( $cart_totals ) ? maybe_unserialize( $cart_totals ) : array( 'total' => 0 );
-		$hash       = ! empty( $cart_session ) ? md5( wp_json_encode( $cart_session ) . $cart_total['total'] ) : '';
+		$hash       = ! empty( $cart_session ) ? md5( wp_json_encode( $cart_session ) . ( $cart_total['total'] ?? 0 ) ) : '';
 
 		$this->cart_hash = $hash;
 	} // END set_cart_hash()
@@ -751,6 +764,31 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	} // END get_carts_expiration()
 
 	/**
+	 * Returns the appropriate cache expiration timestamp.
+	 *
+	 * On REST API requests, uses $cart_expiration (set by set_cart_expiration()).
+	 * On frontend requests, falls back to $_session_expiration (set by WC_Session_Handler).
+	 * If neither is set, returns a default expiration of 2 days from now.
+	 *
+	 * @access protected
+	 *
+	 * @since 4.9.0 Introduced.
+	 *
+	 * @return int Expiration timestamp.
+	 */
+	protected function get_cache_expiration() {
+		if ( ! empty( $this->cart_expiration ) && $this->cart_expiration > time() ) {
+			return (int) $this->cart_expiration;
+		}
+
+		if ( ! empty( $this->_session_expiration ) && $this->_session_expiration > time() ) {
+			return (int) $this->_session_expiration;
+		}
+
+		return time() + ( 2 * DAY_IN_SECONDS );
+	} // END get_cache_expiration()
+
+	/**
 	 * Update the session expiry timestamp.
 	 *
 	 * @param string $customer_id Customer ID.
@@ -795,8 +833,9 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 	public function is_cookie_supported() {
 		cocart_deprecated_function( 'CoCart_Session_Handler::is_cookie_supported', '4.2.0', null );
 
-		return cocart_do_deprecated_filter(
+		return cocart_deprecated_filter(
 			'cocart_cookie_supported',
+			array( true ),
 			'4.2.0',
 			null,
 			sprintf(
@@ -841,17 +880,37 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 		cocart_deprecated_function( 'CoCart_Session_Handler::cocart_setcookie', '4.2.0', null );
 
 		if ( ! headers_sent() ) {
-			// samesite - Set to None by default and only available to those using PHP 7.3 or above. @since 2.9.1.
+			// Samesite — set to None by default and only available to those using PHP 7.3 or above. @since 2.9.1.
 			if ( version_compare( PHP_VERSION, '7.3.0', '>=' ) ) {
-				setcookie( $name, $value, apply_filters( 'cocart_set_cookie_options', array( 'expires' => $expire, 'secure' => $secure, 'path' => COOKIEPATH ? COOKIEPATH : '/', 'domain' => COOKIE_DOMAIN, 'httponly' => apply_filters( 'cocart_cookie_httponly', $httponly, $name, $value, $expire, $secure ), 'samesite' => apply_filters( 'cocart_cookie_samesite', 'Lax' ) ), $name, $value ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
+				$cookie_httponly = cocart_deprecated_filter( 'cocart_cookie_httponly', array( $httponly, $name, $value, $expire, $secure ), '4.2.0' );
+				$cookie_samesite = cocart_deprecated_filter( 'cocart_cookie_samesite', array( 'Lax' ), '4.2.0' );
+				$cookie_options  = cocart_deprecated_filter(
+					'cocart_set_cookie_options',
+					array(
+						array(
+							'expires'  => $expire,
+							'secure'   => $secure,
+							'path'     => COOKIEPATH ? COOKIEPATH : '/',
+							'domain'   => COOKIE_DOMAIN,
+							'httponly' => $cookie_httponly,
+							'samesite' => $cookie_samesite,
+						),
+						$name,
+						$value,
+					),
+					'4.2.0'
+				);
+
+				setcookie( $name, $value, $cookie_options ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound
 			} else {
-				setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, apply_filters( 'cocart_cookie_httponly', $httponly, $name, $value, $expire, $secure ) );
+				$cookie_httponly = cocart_deprecated_filter( 'cocart_cookie_httponly', array( $httponly, $name, $value, $expire, $secure ), '4.2.0' );
+				setcookie( $name, $value, $expire, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, $secure, $cookie_httponly );
 			}
 		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			headers_sent( $file, $line );
 			trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
 		}
-	} // END cocart_cookie()
+	} // END cocart_setcookie()
 
 	/**
 	 * Get cart data.
@@ -1045,6 +1104,13 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 			}
 		}
 
+		/**
+		 * Filter the cart data validity check result.
+		 *
+		 * @since 2.1.0 Introduced.
+		 *
+		 * @param array|false $data The cart data or false if invalid.
+		 */
 		$data = apply_filters( 'cocart_is_cart_data_valid', $data );
 
 		return $data;
@@ -1125,10 +1191,24 @@ class CoCart_Session_Handler extends WC_Session_Handler {
 		}
 
 		if ( empty( $cart_expiration ) ) {
+			/**
+			 * Filter the cart expiration time in seconds.
+			 *
+			 * @since 2.1.0 Introduced.
+			 *
+			 * @param int $expiring Number of seconds before the cart expires.
+			 */
 			$cart_expiration = time() + intval( apply_filters( 'cocart_cart_expiring', DAY_IN_SECONDS * 7 ) );
 		}
 
 		if ( empty( $cart_source ) ) {
+			/**
+			 * Filter the cart source identifier.
+			 *
+			 * @since 3.0.0 Introduced.
+			 *
+			 * @param string $cart_source The cart source.
+			 */
 			$cart_source = apply_filters( 'cocart_cart_source', $this->cart_source );
 		}
 

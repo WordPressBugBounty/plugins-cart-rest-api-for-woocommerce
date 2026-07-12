@@ -4,7 +4,7 @@
  *
  * @author  Sébastien Dumont
  * @package CoCart\Admin\Menus
- * @since   2.0.0
+ * @since   2.0.0 Introduced.
  * @version 3.1.0
  * @license GPL-2.0+
  */
@@ -22,7 +22,8 @@ if ( ! class_exists( 'CoCart_Admin_Menus' ) ) {
 		 * A list with the objects that handle submenu pages
 		 *
 		 * @access public
-		 * @var    array
+		 *
+		 * @var array
 		 */
 		public $submenu_pages = array();
 
@@ -43,15 +44,25 @@ if ( ! class_exists( 'CoCart_Admin_Menus' ) ) {
 		/**
 		 * Add CoCart to the menu.
 		 *
-		 * @access  public
-		 * @since   2.0.0
+		 * @access public
+		 *
+		 * @since   2.0.0 Introduced.
 		 * @version 3.10.5
 		 */
 		public function add_main_menu_page() {
+			/**
+			 * Filter the capability required to access CoCart admin screens.
+			 *
+			 * @since 2.0.0 Introduced.
+			 *
+			 * @param string $capability Required capability.
+			 */
+			$screen_capability = apply_filters( 'cocart_screen_capability', 'manage_options' );
+
 			add_menu_page(
 				'CoCart',
 				'CoCart',
-				apply_filters( 'cocart_screen_capability', 'manage_options' ),
+				$screen_capability,
 				'cocart',
 				function () {
 					return '';
