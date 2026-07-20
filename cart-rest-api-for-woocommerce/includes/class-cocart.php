@@ -29,7 +29,7 @@ final class CoCart {
 	 *
 	 * @var string
 	 */
-	public static $version = '4.9.0';
+	public static $version = '4.9.1';
 
 	/**
 	 * CoCart Database Schema version.
@@ -326,6 +326,15 @@ final class CoCart {
 		// WP-CLI.
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			require_once __DIR__ . '/classes/class-cocart-cli.php';
+		}
+
+		/**
+		 * The plugin suggestions updater must load in all contexts so the
+		 * scheduled action callback is registered when Action Scheduler
+		 * processes the queue via WP-Cron or WP-CLI.
+		 */
+		if ( ! defined( 'COCART_WHITE_LABEL' ) || false === COCART_WHITE_LABEL ) {
+			require_once __DIR__ . '/classes/admin/plugin-suggestions/class-cocart-admin-plugin-suggestions.php';
 		}
 
 		/**

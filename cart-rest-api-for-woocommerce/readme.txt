@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, cart
 Requires at least: 6.7
 Requires PHP: 8.2
 Tested up to: 7.0
-Stable tag: 4.9.0
+Stable tag: 4.9.1
 WC requires at least: 9.0
 WC tested up to: 10.9
 License: GPLv3
@@ -19,8 +19,6 @@ You’ve chosen WooCommerce for your store. Now you want a modern frontend — R
 CoCart gives WooCommerce a proper frontend REST API: cookie-less session management built for stateless frontends, authentication that makes sense, and CORS support built-in. Cart sessions, authentication, and product data. Scale up when you're ready.
 
 In active development since 2018, with a ★4.9/5 rating from the developers who build headless stores with it every day.
-
-**[Features](#features) | [Why CoCart?](#why-cocart) | [Free vs. CoCart Plus](#free-vs-cocart-plus) | [SDKs & Tools](#sdks--tools) | [Support](#need-support) | [Docs](https://cocartapi.com/docs/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=quicklinks)**
 
 = 🚀 Make your first API call in 2 minutes =
 
@@ -291,7 +289,23 @@ We’d love to hear what you have to say. [Share your experience](https://testim
 
 CoCart is open source and community-driven. Every release is tested, maintained, and published here on WordPress.org. Need more power? [CoCart Plus](https://cocartapi.com?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink) unlocks advanced features and priority support.
 
-= v4.9.0 - July 12th, 2026 =
+== v4.9.1 - 20th July, 2026 ==
+
+### Bug Fixes
+
+* REST API: Fixed adding to cart via the v2 add item controller not checking stock for the combined quantity when an item already existed in the cart, allowing the cart to exceed available stock.
+* REST API: Fixed the "Update Cart" callback not checking stock before setting a new item quantity, allowing the cart to be updated beyond available stock.
+* Plugin: Fixed `cocart_update_plugin_suggestions` scheduled action never running via WP-Cron or WP-CLI — the callback was only registered on `admin_init` and the updater class only loaded when `is_admin()` was true, so Action Scheduler could not find a registered callback and the action was never rescheduled. Fixes [#576](https://github.com/co-cart/co-cart/issues/576) reported by [@isam-aqu](https://github.com/isam-aqu).
+
+### Change
+
+* REST API: Standardized "not enough stock" error messages across v1 and v2 cart controllers into a single consistent format.
+
+### Compatibility
+
+* Plugin: Updated styling for the WooCommerce floating admin header refreshed in WooCommerce v10.9.
+
+== v4.9.0 - 12th July, 2026 ==
 
 ### What's New?
 
