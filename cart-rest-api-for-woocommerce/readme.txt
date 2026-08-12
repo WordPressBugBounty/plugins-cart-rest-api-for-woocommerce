@@ -4,9 +4,9 @@ Tags: woocommerce, rest-api, decoupled, headless, cart
 Requires at least: 6.7
 Requires PHP: 8.2
 Tested up to: 7.0
-Stable tag: 4.9.1
+Stable tag: 4.9.2
 WC requires at least: 9.0
-WC tested up to: 10.9
+WC tested up to: 11.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -289,7 +289,17 @@ We’d love to hear what you have to say. [Share your experience](https://testim
 
 CoCart is open source and community-driven. Every release is tested, maintained, and published here on WordPress.org. Need more power? [CoCart Plus](https://cocartapi.com?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink) unlocks advanced features and priority support.
 
-== v4.9.1 - 20th July, 2026 ==
+= v4.9.2 - 12th August, 2026 =
+
+### Bug Fixes
+
+* REST API: Products that have password protection were still accessible. Now return as invalid ID when accessed directly and are excluded from results.
+
+### Compatibility
+
+* Tested with WooCommerce v11
+
+= v4.9.1 - 20th July, 2026 =
 
 ### Bug Fixes
 
@@ -305,7 +315,7 @@ CoCart is open source and community-driven. Every release is tested, maintained,
 
 * Plugin: Updated styling for the WooCommerce floating admin header refreshed in WooCommerce v10.9.
 
-== v4.9.0 - 12th July, 2026 ==
+= v4.9.0 - 12th July, 2026 =
 
 ### What's New?
 
